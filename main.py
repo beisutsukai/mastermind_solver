@@ -95,33 +95,33 @@ def calculate_entropy(value):
     return - math.log(value) / math.log(2)
 
 
-def get_best_combination(list_all_combinations, list_possible_combinations, nb_cases):
+def get_best_combination(list_all_combinations, list_possible_combinations, nb_boxes):
     nb_combinations_possibles_a_priori = len(list_possible_combinations)
-    patterns    = generate_patterns(nb_cases)
+    patterns = generate_patterns(nb_boxes)
     information_from_best_combination = 0
     best_combination = list()
 
     for guess_combination in list_all_combinations:
-        list_entropy_by_pattern = list()
+        ratios_sum = 0
         for pattern in patterns:
             nb_combinations_ok = 0
             for combination_to_evaluate in list_possible_combinations:
                 if check_if_pattern_applies_on_combination(pattern, guess_combination, combination_to_evaluate):
                     nb_combinations_ok = nb_combinations_ok + 1
 
-            if nb_combinations_ok > 0: # If negative, no solutions, so the patterne cannot exist
-                ratio = nb_combinations_ok / nb_combinations_possibles_a_priori
-                information = calculate_entropy(ratio)
-                list_entropy_by_pattern.append(information)
+            if nb_combinations_ok > 0:  # If negative or zero, no solutions, so the pattern cannot exist
+                ratio = (nb_combinations_ok * nb_combinations_ok) / (nb_combinations_possibles_a_priori * nb_combinations_possibles_a_priori)
+                ratios_sum = ratios_sum + ratio
 
-        mean_information = sum(list_entropy_by_pattern) / len(list_entropy_by_pattern)
-        if mean_information > information_from_best_combination:
+        avg_expected_information = calculate_entropy(ratios_sum)
+        if avg_expected_information > information_from_best_combination:
             best_combination = guess_combination
-            information_from_best_combination = mean_information
-            print("New best combination, information : " + str(mean_information) + " ; " + str(best_combination))
+            information_from_best_combination = avg_expected_information
+            print("New best combination, information : " + str(avg_expected_information) + " ; " + str(best_combination))
 
     print("Best combination : " + str(best_combination))
     return best_combination
+
 
 def get_hints(_combination, _secret):
     secret = _secret.copy()
